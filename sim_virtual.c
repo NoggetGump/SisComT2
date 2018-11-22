@@ -8,6 +8,18 @@
 #define KBYTES_BYTES 1000
 #define MBYTES_BYTES 1000000
 
+unsigned int setRightShift(unsigned int size){
+	unsigned int binSize = 2;
+	unsigned int shift = 0;
+
+	while(binSize < size){
+		binSize *= 2;
+		shift++;
+	}
+
+	return 32 - shift;
+}
+
 int main(int argc, char* argv[]){
 	List* pages;
 	Page* currentPage;
@@ -32,52 +44,52 @@ int main(int argc, char* argv[]){
 	maxPages = memorySize*MBYTES_BYTES/fileSize*KBYTES_BYTES;
 
 	while(fscanf(file, "%x %c ", &addr, &rw) == 2) {
-		Page* page = (Page*) malloc(sizeof(Page));
+		Page* page;
 		Page* temp;
 		unsigned int key = addr >> shift;
 
-		page->addr = key;
+		createPage(&page);
+		setAddr(page, key);
 
 		if(rw == 'R'){
-
-			page->R = 1;
-			page->M = 0;
-		}	
+			setReferenced(page, 1);
+			setModified(page, 0);
+		}
 		else{
-			page->R = 0;
-			page->M = 1;
+			setReferenced(page, 0);
+			setModified(page, 1);
 		}
 
 		if(list_size(pages, &listSize) < maxPages) {
-			if((temp = search4key(pages, page->addr)) == NULL)
+			if((temp = search4key(pages, getAddr(page))) == NULL)
 				push_back(pages, page);
 			else {
-				modifyRM(temp, page->R);
+				modifyRM(temp, getReferenced(page));
 				free(page);
 			}
 		}
 		else {
-			if((temp = search4key(pages, page->addr)) == NULL) {
+			if((temp = search4key(pages, getAddr(page))) == NULL) {
 				printf("\nAlgoritmo de selecao entra aqui.\n");
 			}
 			else {
-				modifyRM(temp, page->R);
+				modifyRM(temp, getModified(page));
 				free(page);
 			}
 		}
 	}
 	first(pages);
 	get_val_cursor(pages, (void**) &currentPage);
-	printf("\n%x\n", currentPage->addr);
+	printf("\n%x\n", getAddr(currentPage));
 	printf("\n%c\n", rw);
-	printf("\n%hd", currentPage->R);
-	printf("%hd\n", currentPage->M);
+	printf("\n%hd", getReferenced(currentPage));
+	printf("%hd\n", getModified(currentPage));
 	while(next(pages) == LIS_CondRetOK) {
 		get_val_cursor(pages, (void**) &currentPage);
-		printf("\n%x\n", currentPage->addr);
+		printf("\n%x\n", getAddr(currentPage));
 		printf("\n%c\n", rw);
-		printf("\n%hd", currentPage->R);
-		printf("%hd\n", currentPage->M);
+		printf("\n%hd", getReferenced(currentPage));
+		printf("%hd\n", getModified(currentPage));
 	}
 
 	return 0;

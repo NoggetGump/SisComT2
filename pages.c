@@ -3,22 +3,41 @@
 #include <stdlib.h>
 #include "pages.h"
 
-struct page{
+struct page {
 	unsigned int addr;
 	short R;
 	short M;
 };
 
-unsigned int setRightShift(unsigned int size){
-	unsigned int binSize = 2;
-	unsigned int shift = 0;
+void createPage(Page** page){
+	(*page) = (Page*) malloc(sizeof(Page));
+	(*page)->addr = 0;
+	(*page)->R = 0;
+	(*page)->M = 0;
+}
 
-	while(binSize < size){
-		binSize *= 2;
-		shift++;
-	}
+void setAddr(Page* page, unsigned int addr){
+	page->addr = addr;
+}
 
-	return 32 - shift;
+void setReferenced(Page* page, short R){
+	page->R = R;
+}
+
+void setModified(Page* page, short M){
+	page->M = M;
+}
+
+unsigned int getAddr(Page* page){
+	return page->addr;
+}
+
+short getReferenced(Page* page){
+	return page->R;
+}
+
+short getModified(Page* page){
+	return page->M;
 }
 
 void modifyRM(Page* page, short R){

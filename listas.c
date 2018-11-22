@@ -38,8 +38,7 @@
 *     Descreve a organização dos Nós em uma Lista
 *
 ***********************************************************************/
-struct node
-{
+struct node {
 	struct node* next;	//Aponta para o próximo nó
 	struct node* prev;  //Aponta para o nó anterior
 	void* val;			//Aponta para variável val

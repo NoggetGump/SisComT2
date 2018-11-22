@@ -5,7 +5,19 @@
 
 typedef struct page Page;
 
-unsigned int setRightShift(unsigned int size);
+void createPage(Page** page);
+
+void setAddr(Page* page, unsigned int addr);
+
+void setReferenced(Page* page, short R);
+
+void setModified(Page* page, short M);
+
+unsigned int getAddr(Page* page);
+
+short getReferenced(Page* page);
+
+short getModified(Page* page);
 
 void modifyRM(Page* page, short R);
 
