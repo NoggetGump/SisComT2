@@ -47,14 +47,28 @@ void modifyRM(Page* page, short R){
 		page->M = 1;
 }
 
+void cleaRM(List* pages) {
+	Page* currentPage;
+
+	first(pages);
+	if(get_val_cursor(pages, (void**) &currentPage) != LIS_CondRetOK)
+		return;
+	currentPage->R = 0;
+	currentPage->M = 0;
+	do {
+		get_val_cursor(pages, (void**) &currentPage);
+		currentPage->R = 0;
+		currentPage->M = 0;
+	} while(next(pages) == LIS_CondRetOK);
+}
+
 Page* search4key(List* pages, unsigned int key){
 	Page* currentPage;
 
 	first(pages);
 	if(get_val_cursor(pages, (void**) &currentPage) != LIS_CondRetOK)
 		return NULL;
-	while(currentPage->addr != key)
-	{
+	while(currentPage->addr != key)	{
 		if(next(pages) != LIS_CondRetOK)
 			return NULL;
 		get_val_cursor(pages, (void**) &currentPage);
@@ -67,8 +81,10 @@ Page* search4leastUsed(List* pages){
 	Page* currentPage;
 
 	first(pages);
-	if(get_val_cursor(pages, (void**) &currentPage) != LIS_CondRetOK)
+	if(get_val_cursor(pages, (void**) &currentPage) != LIS_CondRetOK) {
+		printf("LIST ERROR IN EXECUTION");
 		return NULL;
+	}
 	do {
 		if(currentPage->R == 0 && currentPage->M == 0)
 			return currentPage;

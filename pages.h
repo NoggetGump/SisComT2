@@ -21,6 +21,8 @@ short getModified(Page* page);
 
 void modifyRM(Page* page, short R);
 
+void cleaRM(List* pages);
+
 Page* search4key(List* pages, unsigned int key);
 
 Page* search4leastUsed(List* pages);

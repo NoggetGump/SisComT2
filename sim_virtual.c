@@ -10,23 +10,27 @@
 
 unsigned int setRightShift(unsigned int size){
 	unsigned int binSize = 2;
-	unsigned int shift = 0;
+	unsigned int shift = 1;
+	unsigned int Const = 32;
 
+	printf("\nsize - %d\n", size);
 	while(binSize < size){
 		binSize *= 2;
+		printf("\nbinsize - %u\n", binSize);
 		shift++;
 	}
 
-	return 32 - shift;
+	return Const - shift;
 }
 
 int main(int argc, char* argv[]){
 	List* pages;
-	Page* currentPage;
-	FILE* file = fopen(argv[1], "r");
-	unsigned int fileSize = atoi(argv[2]);
-	unsigned int memorySize = atoi(argv[3]);
-	unsigned int shift, addr, listSize, maxPages;
+//	Page* currentPage;
+	FILE* file = fopen(argv[2], "r");
+	FILE* answrFile = fopen("answr.txt", "w");
+	unsigned int fileSize = atoi(argv[3]);
+	unsigned int memorySize = atoi(argv[4]);
+	unsigned int shift, addr, listSize, maxPages, writenPages = 0, pageFaults = 0, timer = 0;
 	char rw;
 
 	createList(&pages);
@@ -40,14 +44,19 @@ int main(int argc, char* argv[]){
 		return 0;
 	}
 
+	printf("\nSomething - %u\n", fileSize*KBYTES_BITS);
 	shift  = setRightShift(fileSize*KBYTES_BITS);
-	maxPages = memorySize*MBYTES_BYTES/fileSize*KBYTES_BYTES;
+	printf("\nshift - %u\n", shift);
+	maxPages = (memorySize*MBYTES_BYTES)/(fileSize*KBYTES_BYTES);
+	printf("\nExecutando...\n");
+	fprintf(answrFile, "--- EXECUTION LOG ---\n");
 
 	while(fscanf(file, "%x %c ", &addr, &rw) == 2) {
 		Page* page;
 		Page* temp;
 		unsigned int key = addr >> shift;
 
+	//	printf("\n%x\n", key);
 		createPage(&page);
 		setAddr(page, key);
 
@@ -59,38 +68,59 @@ int main(int argc, char* argv[]){
 			setReferenced(page, 0);
 			setModified(page, 1);
 		}
-
-		if(list_size(pages, &listSize) < maxPages) {
-			if((temp = search4key(pages, getAddr(page))) == NULL)
+		if(timer == 100){
+			timer = 0;
+			cleaRM(pages);
+		}
+		list_size(pages, &listSize);
+		if(listSize < maxPages) {
+			if((temp = search4key(pages, getAddr(page))) == NULL) {
 				push_back(pages, page);
+				fprintf(answrFile, "\nAddress - %u - Page Fault\n", getAddr(page));
+				fprintf(answrFile, "Referenced - %d\n", getReferenced(page));
+				fprintf(answrFile, "Modified - %d\n", getModified(page));
+				fprintf(answrFile, "__________________________\n");
+				writenPages++;
+				pageFaults++;
+			}
 			else {
 				modifyRM(temp, getReferenced(page));
+				fprintf(answrFile, "\nAddress - %u - Succesfully Read or Modified\n", getAddr(temp));
+				fprintf(answrFile, "Referenced - %d\n", getReferenced(temp));
+				fprintf(answrFile, "Modified - %d\n", getModified(temp));
+				fprintf(answrFile, "__________________________\n");
 				free(page);
 			}
 		}
 		else {
 			if((temp = search4key(pages, getAddr(page))) == NULL) {
-				printf("\nAlgoritmo de selecao entra aqui.\n");
+				//algoritmo de substituição entra aqui
+				temp = search4leastUsed(pages);
+				temp = page;
+				fprintf(answrFile, "\nAddress - %u - Page Fault\n", getAddr(page));
+				fprintf(answrFile, "Referenced - %d\n", getReferenced(page));
+				fprintf(answrFile, "Modified - %d\n", getModified(page));
+				fprintf(answrFile, "__________________________\n");
+				pageFaults++;
 			}
 			else {
-				modifyRM(temp, getModified(page));
+				modifyRM(temp, getReferenced(page));
+				fprintf(answrFile, "\nAddress - %u - Succesfully Read or Modified\n", getAddr(temp));
+				fprintf(answrFile, "Referenced - %d\n", getReferenced(temp));
+				fprintf(answrFile, "Modified - %d\n", getModified(temp));
+				fprintf(answrFile, "__________________________\n");
 				free(page);
 			}
 		}
+		timer ++;
 	}
-	first(pages);
-	get_val_cursor(pages, (void**) &currentPage);
-	printf("\n%x\n", getAddr(currentPage));
-	printf("\n%c\n", rw);
-	printf("\n%hd", getReferenced(currentPage));
-	printf("%hd\n", getModified(currentPage));
-	while(next(pages) == LIS_CondRetOK) {
-		get_val_cursor(pages, (void**) &currentPage);
-		printf("\n%x\n", getAddr(currentPage));
-		printf("\n%c\n", rw);
-		printf("\n%hd", getReferenced(currentPage));
-		printf("%hd\n", getModified(currentPage));
-	}
+
+	printf("\nAlgoritmo de substituicao = %s\n", argv[1]);
+	printf("\nArquivo de entrada = %s\n", argv[2]);
+	printf("\nFile size = %u KB\n", fileSize);
+	printf("\nMemory size = %u MB\n", memorySize);
+	printf("\nPage Faults = %u\n", pageFaults);
+	printf("\nPaginas Escritas = %u\n\n", writenPages);
 
 	return 0;
 }

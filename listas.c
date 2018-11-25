@@ -317,7 +317,7 @@ LIS_tpCondRet next(List* l)
 		}
 	else if(l->cursor->next == NULL)
 	{
-		printf("\n\n <!> Cursor ja posicionado no final da lista <!> \n\n");
+//		printf("\n\n <!> Cursor ja posicionado no final da lista <!> \n\n");
 		return LIS_CondRetCursorNoFinal;
 	}
 	else 
