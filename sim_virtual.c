@@ -4,23 +4,22 @@
 #include "pages.h"
 //#include "listas.h" definido em pages.h
 
-#define KBYTES_BITS 8000
 #define KBYTES_BYTES 1000
 #define MBYTES_BYTES 1000000
 
-unsigned int setRightShift(unsigned int size){
+unsigned int setRightShift(unsigned int maxBytes){
 	unsigned int binSize = 2;
 	unsigned int shift = 1;
-	unsigned int Const = 32;
 
-	printf("\nsize - %d\n", size);
-	while(binSize < size){
+	if(maxBytes == 0)
+		return 0;
+	while(binSize - 1 < maxBytes){
 		binSize *= 2;
-		printf("\nbinsize - %u\n", binSize);
+//		printf("\nbinsize - %u\n", binSize);
 		shift++;
 	}
 
-	return Const - shift;
+	return shift;
 }
 
 int main(int argc, char* argv[]){
@@ -44,13 +43,12 @@ int main(int argc, char* argv[]){
 		return 0;
 	}
 
-	printf("\nSomething - %u\n", fileSize*KBYTES_BITS);
-	shift  = setRightShift(fileSize*KBYTES_BITS);
+	printf("\nSomething - %u\n", fileSize*KBYTES_BYTES);
+	shift  = setRightShift(fileSize*KBYTES_BYTES);
 	printf("\nshift - %u\n", shift);
 	maxPages = (memorySize*MBYTES_BYTES)/(fileSize*KBYTES_BYTES);
 	printf("\nExecutando...\n");
 	fprintf(answrFile, "--- EXECUTION LOG ---\n");
-
 	while(fscanf(file, "%x %c ", &addr, &rw) == 2) {
 		Page* page;
 		Page* temp;
